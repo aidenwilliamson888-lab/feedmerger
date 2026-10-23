@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RSS Item Merger — Podcast Tools</title>
+<style>
+:root{color-scheme:dark;--bg:#090d16;--panel:#111827;--panel2:#0d1421;--line:#263449;--text:#eef4ff;--muted:#91a0b7;--green:#40d7a0;--blue:#70a7ff;--red:#ff7777;--amber:#f5c56b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#142039 0,#090d16 50%);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:28px 18px 50px}.hero{margin-bottom:22px}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.hero h1{font-size:clamp(27px,4vw,40px);line-height:1.12;margin:9px 0}.hero p{color:var(--muted);max-width:760px;margin:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:linear-gradient(180deg,rgba(18,27,43,.97),rgba(13,20,33,.97));border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0;box-shadow:0 16px 45px #0002}.card h2{font-size:17px;margin:0 0 7px}.sub{color:var(--muted);font-size:13px;margin:0 0 16px}.drop{border:1px dashed #40516c;border-radius:13px;padding:20px;text-align:center;background:#0a111d;cursor:pointer;transition:.15s}.drop:hover,.drop.drag{border-color:var(--green);background:#0e1c27}.drop strong{display:block;margin-bottom:5px}.drop span{font-size:12px;color:var(--muted)}input[type=file]{display:none}.filelist{font-size:12px;color:var(--muted);margin-top:10px;overflow-wrap:anywhere}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}.btn{border:1px solid #34435a;background:#182338;color:var(--text);border-radius:10px;padding:11px 15px;font-weight:750;cursor:pointer;font:inherit;font-size:13px}.btn.primary{background:var(--green);border-color:var(--green);color:#062117}.btn:disabled{opacity:.4;cursor:not-allowed}.btn:hover:not(:disabled){filter:brightness(1.08)}.wide{grid-column:1/-1}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:14px}.stat b{display:block;font-size:24px;letter-spacing:-.03em}.stat span{color:var(--muted);font-size:12px}.status{border-radius:10px;padding:11px 13px;background:#0b1220;border:1px solid var(--line);color:var(--muted);font-size:13px;margin-top:14px;white-space:pre-wrap}.status.good{border-color:#236c55;color:#a4f5d4}.status.bad{border-color:#7d3434;color:#ffb3b3}.status.warn{border-color:#735d2d;color:#ffe1a0}.meta{font-size:13px;color:var(--muted);overflow-wrap:anywhere}.meta b{color:var(--text)}.checkrow{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:var(--muted);margin-top:12px}.checkrow input{margin-top:4px;accent-color:var(--green)}.preview{overflow:auto;max-height:360px;border:1px solid var(--line);border-radius:12px}table{border-collapse:collapse;width:100%;font-size:12px;min-width:620px}th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #233047;vertical-align:top}th{position:sticky;top:0;background:#151f31;color:#cbd7eb}td{color:#b7c4d9}td:first-child{color:var(--text);max-width:330px;overflow-wrap:anywhere}.tag{display:inline-block;padding:3px 7px;border-radius:7px;font-size:11px;font-weight:800}.tag.add{background:#123c30;color:#87f2c6}.tag.dup{background:#3b2e16;color:#ffdc8a}.tag.bad{background:#411f25;color:#ffb2b2}.note{font-size:12px;color:var(--muted);margin-top:12px}.foot{color:#728199;font-size:12px;margin-top:18px;text-align:center}code{color:#a9d2ff;background:#0a111d;padding:2px 5px;border-radius:5px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.stats{grid-template-columns:repeat(2,1fr)}.card{padding:16px}.wrap{padding:20px 12px 36px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Podcast RSS Toolkit</div>
+    <h1>RSS Item Merger</h1>
+    <p>Gabungkan item episode dari banyak RSS generator ke RSS utama. Metadata channel RSS utama dipertahankan; yang ditambahkan hanya elemen <code>&lt;item&gt;</code>.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>01 · RSS utama</h2>
+      <p class="sub">Pilih XML feed yang sudah terdaftar di Spotify. Channel ini menjadi sumber metadata final.</p>
+      <label class="drop" id="mainDrop" for="mainFile"><strong>📄 Pilih RSS utama (.xml)</strong><span>atau tarik file XML ke area ini</span></label>
+      <input id="mainFile" type="file" accept=".xml,.rss,.txt,application/xml,text/xml">
+      <div class="filelist" id="mainInfo">Belum ada file dipilih.</div>
+    </section>
+    <section class="card">
+      <h2>02 · RSS tambahan</h2>
+      <p class="sub">Pilih satu atau banyak XML hasil generator baru. Semua item akan dibaca, metadata channel sumber diabaikan.</p>
+      <label class="drop" id="extraDrop" for="extraFiles"><strong>➕ Pilih banyak RSS tambahan</strong><span>Bisa pilih beberapa file sekaligus atau drag & drop</span></label>
+      <input id="extraFiles" type="file" multiple accept=".xml,.rss,.txt,application/xml,text/xml">
+      <div class="filelist" id="extraInfo">Belum ada file tambahan.</div>
+      <label class="checkrow"><input id="strict" type="checkbox" checked><span>Deduplicate berdasarkan GUID terlebih dahulu, lalu URL enclosure. Kalau GUID berbeda tetapi URL audio sama, item dianggap duplikat.</span></label>
+    </section>
+
+    <section class="card wide">
+      <h2>03 · Hasil pemeriksaan</h2>
+      <p class="sub">Tool memeriksa duplikat sebelum mengekspor. Item utama tidak diubah dan urutan item yang sudah ada tetap dipertahankan.</p>
+      <div class="stats">
+        <div class="stat"><b id="nExisting">—</b><span>Item di RSS utama</span></div>
+        <div class="stat"><b id="nRead">—</b><span>Item dari sumber tambahan</span></div>
+        <div class="stat"><b id="nAdd">—</b><span>Item baru siap ditambahkan</span></div>
+        <div class="stat"><b id="nDup">—</b><span>Duplikat dilewati</span></div>
+      </div>
+      <div class="status" id="status">Pilih RSS utama dan minimal satu RSS tambahan, lalu klik “Analisis & gabungkan”.</div>
+      <div class="actions">
+        <button class="btn primary" id="mergeBtn" disabled>Analisis & gabungkan</button>
+        <button class="btn" id="downloadBtn" disabled>Download RSS hasil merger</button>
+        <button class="btn" id="reportBtn" disabled>Download laporan CSV</button>
+        <button class="btn" id="resetBtn">Reset</button>
+      </div>
+      <p class="note">Catatan: hasil download belum otomatis mengganti RSS online. Untuk pembaruan Spotify, file hasil merger harus dipublikasikan pada URL feed yang sama dengan yang sudah terdaftar.</p>
+    </section>
+
+    <section class="card wide">
+      <h2>04 · Preview item</h2>
+      <p class="sub">Daftar episode tambahan beserta statusnya.</p>
+      <div class="preview">
+        <table>
+          <thead><tr><th>Status</th><th>Judul</th><th>GUID / fallback</th><th>Enclosure URL</th></tr></thead>
+          <tbody id="previewBody"><tr><td colspan="4">Belum ada analisis.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  <div class="foot">RSS Item Merger · Berjalan lokal di browser · File tidak diunggah ke server mana pun</div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let mainFile = null, extraFiles = [], mainDoc = null, outputXml = "", reportRows = [], analysisDone = false;
+  const parser = new DOMParser(), serializer = new XMLSerializer();
+  const RSS_NS = "http://purl.org/rss/1.0/";
+  const trim = v => (v || "").trim();
+  const localName = el => (el && (el.localName || el.nodeName.split(":").pop()) || "").toLowerCase();
+  const directChild = (parent, name) => Array.from(parent ? parent.children : []).find(el => localName(el) === name) || null;
+  const directChildren = (parent, name) => Array.from(parent ? parent.children : []).filter(el => localName(el) === name);
+  const childText = (parent, name) => {
+    const el = directChild(parent, name);
+    return el ? trim(el.textContent) : "";
+  };
+  const enclosureUrl = item => {
+    const el = directChild(item, "enclosure");
+    return el ? trim(el.getAttribute("url")) : "";
+  };
+  const itemGuid = item => {
+    const el = directChild(item, "guid");
+    return el ? trim(el.textContent) : "";
+  };
+  const itemTitle = item => childText(item, "title") || "(tanpa judul)";
+  const canonicalUrl = value => {
+    try { const u = new URL(value); u.hash = ""; return u.href; } catch { return trim(value); }
+  };
+  const parseXml = (xml, name) => {
+    const doc = parser.parseFromString(xml, "application/xml");
+    if (doc.querySelector("parsererror") || !doc.documentElement || localName(doc.documentElement) !== "rss") {
+      throw new Error(name + ": XML tidak valid atau root bukan <rss>.");
+    }
+    const channel = directChild(doc.documentElement, "channel");
+    if (!channel) throw new Error(name + ": elemen <channel> tidak ditemukan.");
+    return {doc, channel, items: directChildren(channel, "item")};
+  };
+  const readFile = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Gagal membaca file " + file.name));
+    reader.readAsText(file);
+  });
+  const setStatus = (msg, type="") => {
+    $("status").textContent = msg;
+    $("status").className = "status" + (type ? " " + type : "");
+  };
+  const fmt = n => Number(n).toLocaleString("id-ID");
+  const updateButtons = () => { $("mergeBtn").disabled = !(mainFile && extraFiles.length); };
+  const invalidate = () => {
+    mainDoc = null; outputXml = ""; reportRows = []; analysisDone = false;
+    $("downloadBtn").disabled = true; $("reportBtn").disabled = true;
+    ["nExisting","nRead","nAdd","nDup"].forEach(id => $(id).textContent = "—");
+    $("previewBody").innerHTML = '<tr><td colspan="4">Belum ada analisis.</td></tr>';
+    updateButtons();
+  };
+  const bindDrop = (dropId, inputId, handler) => {
+    const drop = $(dropId), input = $(inputId);
+    ["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("drag"); }));
+    ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("drag"); }));
+    drop.addEventListener("drop", e => {
+      const files = Array.from(e.dataTransfer.files || []).filter(f => /\.(xml|rss|txt)$/i.test(f.name) || /xml/i.test(f.type));
+      if (files.length) handler(files);
+    });
+    input.addEventListener("change", () => { if (input.files.length) handler(Array.from(input.files)); input.value = ""; });
+  };
+  bindDrop("mainDrop", "mainFile", files => {
+    mainFile = files[0]; $("mainInfo").textContent = mainFile.name + " · " + fmt(mainFile.size) + " bytes";
+    invalidate(); setStatus("RSS utama dipilih. Pilih RSS tambahan, lalu analisis.", "good");
+  });
+  bindDrop("extraDrop", "extraFiles", files => {
+    extraFiles = files; $("extraInfo").textContent = fmt(files.length) + " file: " + files.map(f => f.name).join(", ");
+    invalidate(); setStatus("RSS tambahan dipilih: " + fmt(files.length) + " file. Klik “Analisis & gabungkan”.", "good");
+  });
+  function keySet(items, strict) {
+    const guids = new Set(), urls = new Set();
+    items.forEach(item => {
+      const guid = itemGuid(item);
+      const url = canonicalUrl(enclosureUrl(item));
+      if (guid) guids.add(guid);
+      if (url) urls.add(url);
+    });
+    return {guids, urls, strict};
+  }
+  function duplicateReason(item, sets, strict) {
+    const guid = itemGuid(item), url = canonicalUrl(enclosureUrl(item));
+    if (guid && sets.guids.has(guid)) return "GUID sudah ada";
+    if (url && sets.urls.has(url)) return "URL enclosure sudah ada";
+    return "";
+  }
+  function addToSets(item, sets) {
+    const guid = itemGuid(item), url = canonicalUrl(enclosureUrl(item));
+    if (guid) sets.guids.add(guid);
+    if (url) sets.urls.add(url);
+  }
+  function esc(s) {
+    return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+  }
+  function makePreview(rows) {
+    const body = $("previewBody"); body.replaceChildren();
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="4">Tidak ada item dari RSS tambahan.</td></tr>'; return;
+    }
+    rows.slice(0, 1000).forEach(row => {
+      const tr = document.createElement("tr");
+      const statusTd = document.createElement("td");
+      const tag = document.createElement("span");
+      tag.className = "tag " + (row.status === "ADD" ? "add" : row.status === "DUPLICATE" ? "dup" : "bad");
+      tag.textContent = row.status === "ADD" ? "DITAMBAHKAN" : row.status === "DUPLICATE" ? "DUPLIKAT" : "PERIKSA";
+      statusTd.appendChild(tag);
+      const titleTd = document.createElement("td"); titleTd.textContent = row.title;
+      const guidTd = document.createElement("td"); guidTd.textContent = row.guid || "(GUID kosong)";
+      const urlTd = document.createElement("td"); urlTd.textContent = row.url || "(enclosure kosong)";
+      tr.append(statusTd,titleTd,guidTd,urlTd); body.appendChild(tr);
+    });
+    if (rows.length > 1000) {
+      const tr = document.createElement("tr"), td = document.createElement("td");
+      td.colSpan = 4; td.textContent = "Preview dibatasi 1.000 item; semua item tetap diproses.";
+      tr.appendChild(td); body.appendChild(tr);
+    }
+  }
+  async function analyze() {
+    if (!mainFile || !extraFiles.length) return;
+    $("mergeBtn").disabled = true; setStatus("Membaca RSS dan memeriksa duplikat…");
+    try {
+      const mainText = await readFile(mainFile);
+      const parsedMain = parseXml(mainText, mainFile.name);
+      mainDoc = parsedMain.doc;
+      const existing = parsedMain.items;
+      const sets = keySet(existing, $("strict").checked);
+      let totalRead = 0, addCount = 0, dupCount = 0, invalidCount = 0;
+      const rows = [], acceptedItems = [];
+      for (const file of extraFiles) {
+        const parsed = parseXml(await readFile(file), file.name);
+        for (const item of parsed.items) {
+          totalRead++;
+          const guid = itemGuid(item), url = enclosureUrl(item), title = itemTitle(item);
+          if (!url) {
+            invalidCount++;
+            rows.push({status:"INVALID", title, guid, url, file:file.name, reason:"Tidak ada enclosure URL"});
+            continue;
+          }
+          const reason = duplicateReason(item, sets, $("strict").checked);
+          if (reason) {
+            dupCount++;
+            rows.push({status:"DUPLICATE", title, guid, url, file:file.name, reason});
+            continue;
+          }
+          // Items without GUID are allowed only when enclosure URL is present; preserve original item.
+          if (!guid) {
+            // Report that GUID is missing, but do not invent one or alter source metadata.
+            rows.push({status:"ADD", title, guid, url, file:file.name, reason:"Ditambahkan; GUID sumber kosong"});
+          } else {
+            rows.push({status:"ADD", title, guid, url, file:file.name, reason:""});
+          }
+          acceptedItems.push(item);
+          addToSets(item, sets);
+          addCount++;
+        }
+      }
+      // Clone only <item> nodes into the main channel. Other channel metadata is untouched.
+      const mainChannel = directChild(mainDoc.documentElement, "channel");
+      acceptedItems.forEach(item => mainChannel.appendChild(mainDoc.importNode(item, true)));
+      outputXml = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(mainDoc);
+      reportRows = rows; analysisDone = true;
+      $("nExisting").textContent = fmt(existing.length);
+      $("nRead").textContent = fmt(totalRead);
+      $("nAdd").textContent = fmt(addCount);
+      $("nDup").textContent = fmt(dupCount);
+      makePreview(rows);
+      $("downloadBtn").disabled = false; $("reportBtn").disabled = false;
+      let msg = "Selesai. " + fmt(addCount) + " item baru ditambahkan ke hasil; " + fmt(dupCount) + " duplikat dilewati.";
+      if (invalidCount) msg += "\n" + fmt(invalidCount) + " item tanpa enclosure URL dilewati.";
+      msg += "\nMetadata channel utama dipertahankan. Periksa preview sebelum memakai file hasil.";
+      setStatus(msg, invalidCount ? "warn" : "good");
+    } catch (err) {
+      outputXml = ""; reportRows = []; analysisDone = false;
+      $("downloadBtn").disabled = true; $("reportBtn").disabled = true;
+      setStatus(err.message || String(err), "bad");
+    } finally { updateButtons(); }
+  }
+  function download(filename, content, type) {
+    const blob = new Blob([content], {type});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  $("mergeBtn").addEventListener("click", analyze);
+  $("downloadBtn").addEventListener("click", () => {
+    if (!analysisDone || !outputXml) return;
+    download("rss-merged-" + new Date().toISOString().slice(0,10) + ".xml", outputXml, "application/rss+xml;charset=utf-8");
+  });
+  $("reportBtn").addEventListener("click", () => {
+    if (!analysisDone) return;
+    const rows = [["status","title","guid","enclosure_url","source_file","reason"], ...reportRows.map(r => [r.status,r.title,r.guid,r.url,r.file,r.reason])];
+    const csv = rows.map(row => row.map(v => '"' + String(v ?? "").replaceAll('"','""') + '"').join(",")).join("\r\n");
+    download("rss-merge-report.csv", "\uFEFF" + csv, "text/csv;charset=utf-8");
+  });
+  $("resetBtn").addEventListener("click", () => {
+    mainFile = null; extraFiles = []; mainDoc = null; outputXml = ""; reportRows = []; analysisDone = false;
+    $("mainInfo").textContent = "Belum ada file dipilih."; $("extraInfo").textContent = "Belum ada file tambahan.";
+    $("mainFile").value = ""; $("extraFiles").value = "";
+    invalidate(); setStatus("Reset selesai. Pilih RSS utama dan file RSS tambahan.");
+  });
+  $("strict").addEventListener("change", invalidate);
+})();
+</script>
+</body>
+</html>
