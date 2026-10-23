@@ -230,7 +230,10 @@
       // Clone only <item> nodes into the main channel. Other channel metadata is untouched.
       const mainChannel = directChild(mainDoc.documentElement, "channel");
       acceptedItems.forEach(item => mainChannel.appendChild(mainDoc.importNode(item, true)));
-      outputXml = '<?xml version="1.0" encoding="UTF-8"?>\n' + serializer.serializeToString(mainDoc);
+      const serialized = serializer.serializeToString(mainDoc);
+      // Some browsers include an XML declaration when serializing a Document.
+      // Ensure the exported XML contains exactly one declaration at the start.
+      outputXml = '<?xml version="1.0" encoding="UTF-8"?>\n' + serialized.replace(/^\s*<\?xml[^?]*\?>\s*/i, "");
       reportRows = rows; analysisDone = true;
       $("nExisting").textContent = fmt(existing.length);
       $("nRead").textContent = fmt(totalRead);
